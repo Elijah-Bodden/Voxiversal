@@ -1,15 +1,14 @@
-import { REFERRAL_AMOUNT } from 'common/economy'
 import {
-  APPLE_APP_URL,
-  DOMAIN,
-  ENV_CONFIG,
-  GOOGLE_PLAY_APP_URL,
-} from 'common/envs/constants'
+  fqdn,
+  discord,
+  infoEmail,
+  newsletterEmailSubscribe,
+} from 'common/config/defs'
+
+import { REFERRAL_AMOUNT } from 'common/economy'
 import { formatMoney } from 'common/util/format'
 import Link from 'next/link'
-import { useState } from 'react'
 import Masonry from 'react-masonry-css'
-import { MobileAppsQRCodeDialog } from 'web/components/buttons/mobile-apps-qr-code-button'
 import { Col } from 'web/components/layout/col'
 import { Page } from 'web/components/layout/page'
 import { Spacer } from 'web/components/layout/spacer'
@@ -18,169 +17,62 @@ import { SEO } from 'web/components/SEO'
 import { Card } from 'web/components/widgets/card'
 import { Subtitle } from 'web/components/widgets/subtitle'
 import { Title } from 'web/components/widgets/title'
-import { useIsMobile } from 'web/hooks/use-is-mobile'
 import { useUser } from 'web/hooks/use-user'
-import { getNativePlatform } from 'web/lib/native/is-native'
-import { isIOS } from 'web/lib/util/device'
 
 export default function AboutPage() {
-  const { isNative, platform } = getNativePlatform()
-
-  const isMobile = useIsMobile()
-  const [isModalOpen, setIsModalOpen] = useState(false)
-
-  const appCallback = isMobile
-    ? { href: isIOS() ? APPLE_APP_URL : GOOGLE_PLAY_APP_URL }
-    : ({
-        href: '#',
-        onClick: (e: any) => {
-          e.preventDefault()
-          setIsModalOpen(true)
-        },
-      } as { href: string }) // typechecker is dumb
-
   const user = useUser()
 
   return (
     <Page>
-      <SEO title="About" description="About Manifold Markets" url="/sitemap" />
+      <SEO title="About" description="About Voxiversal" url="/sitemap" />
 
       <Col className="p-4">
         <Title>About</Title>
 
         <div className="mb-4 text-lg">
-          Manifold Markets is a play-money prediction market platform where you
-          can bet on anything.
+          Voxiversal is an opinion-based social media platform aimed at
+          determining global sentiments on AI and existential risk.
         </div>
 
         <LabCard
-          title="📈 What is a prediction market?"
-          href="https://docs.manifold.markets/faq#what-is-a-prediction-market"
+          title="💪 Built on Manifold Markets"
+          href={'https://' + fqdn + '/faq#manifold'}
         />
         <LabCard
-          title="💰 What is mana (Ṁ)?"
-          href="https://docs.manifold.markets/faq#what-is-mana-m"
-        />
-        <LabCard
-          title="🙋‍♂️ Learn more in our FAQ"
-          href="https://docs.manifold.markets/faq"
+          title="🧐 Check out our FAQ"
+          href={'https://' + fqdn + '/faq'}
         />
 
         <Subtitle>🌎 Stay connected</Subtitle>
         <LabSection>
-          {!isNative && (
-            <>
-              <MobileAppsQRCodeDialog
-                isModalOpen={isModalOpen}
-                setIsModalOpen={setIsModalOpen}
-              />
-              <LabCard
-                title="📱 Mobile app"
-                description="Download the iOS/Android app"
-                {...appCallback}
-              />
-            </>
-          )}
           <LabCard
             title="💬 Discord"
-            href="https://discord.com/invite/eHQBNBqXuh"
+            href={discord}
             description="Chat with the community and team"
           />
           <LabCard
             title="📰 Newsletter"
-            href="https://news.manifold.markets/"
+            href={newsletterEmailSubscribe}
             description="Get updates on new features and markets"
           />
           <LabCard
-            title="🪺 Twitter"
-            href="https://twitter.com/ManifoldMarkets"
-            description="Follow us for updates and memes"
-          />
-          <LabCard
             title="✉️️ Email"
-            href="mailto:info@manifold.markets"
+            href={'mailto:' + infoEmail}
             description="Contact us for support or feedback"
           />
         </LabSection>
 
         <Subtitle>📄 Pages</Subtitle>
         <LabSection>
-          {(!isNative || (isNative && platform !== 'ios')) && (
-            <LabCard
-              title="🫀 Charity"
-              description={`Turn mana into real charitable donations`}
-              href="/charity"
-            />
-          )}
-          <LabCard
-            title="💸 Referrals"
-            description={`Refer a friend to earn ${formatMoney(
-              REFERRAL_AMOUNT
-            )}`}
-            href="/referrals"
-          />
-          {(!isNative || (isNative && platform !== 'ios')) && (
-            <LabCard
-              title="💰 Get Mana"
-              href="/add-funds"
-              description={`Top up your account with ${ENV_CONFIG.moneyMoniker}`}
-            />
-          )}
           <LabCard
             title="🏆 Leaderboards"
             href="/leaderboards"
             description="Global profit rankings"
           />
           <LabCard
-            title="💸 Manalinks"
-            description={`Send ${ENV_CONFIG.moneyMoniker} to anyone`}
-            href="/links"
-          />
-          <LabCard
-            title="📏 Platform calibration"
-            description="Manifold's overall track record"
-            href="/calibration"
-          />
-          <LabCard
-            title="🏆 CSPI/Salem tournament"
-            description="Special contest on politics and current events"
-            href="https://salemcenter.manifold.markets/"
-          />
-          <LabCard
             title="📜 Community guidelines"
             description="General expectations and account rules"
             href="https://manifoldmarkets.notion.site/Community-Guidelines-f6c77b1af41749828df7dae5e8735400"
-          />
-          <LabCard
-            title="😎 Awesome Manifold"
-            description="Community-created projects built on Manifold"
-            href="https://manifoldmarkets.notion.site/Awesome-Manifold-4b93a64528674290989ef8a9f696b460"
-          />
-        </LabSection>
-
-        <Subtitle>🧪 Experiments</Subtitle>
-        <LabSection>
-          {user && (
-            <LabCard
-              title="🎁 Loot Box"
-              description="Invest in random markets"
-              href="/lootbox"
-            />
-          )}
-          <LabCard
-            title="🔥 Swipe"
-            description="Swipe-to-bet UI. Try via iOS/Android app."
-            {...(isNative ? { href: '/swipe' } : appCallback)}
-          />
-          <LabCard
-            title="❓ Q&A"
-            description="Ask and answer questions to win mana"
-            href="/q-and-a"
-          />
-          <LabCard
-            title="✏ Posts"
-            description="Go long on longform"
-            href="/latestposts"
           />
         </LabSection>
 
