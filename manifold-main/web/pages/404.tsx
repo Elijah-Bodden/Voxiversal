@@ -1,6 +1,7 @@
 import { IS_PRIVATE_MANIFOLD } from 'common/envs/constants'
 import { Page } from 'web/components/layout/page'
 import { Title } from 'web/components/widgets/title'
+import { bugEmail } from 'web/../common/config/defs'
 
 export default function Custom404(props: { customText?: string }) {
   if (IS_PRIVATE_MANIFOLD) {
@@ -22,15 +23,8 @@ export function Custom404Content(props: { customText?: string }) {
       <Title children="404: Oops!" />
       {customText && <p>{customText}</p>}
       {!customText && <p>Nothing exists at this location.</p>}
-      <p>If you didn't expect this, let us know on Discord!</p>
+      <p>If you didn't expect this, shoot us an <a href={'mailto:' + bugEmail}>email</a>!</p>
       <br />
-      <iframe
-        src="https://discord.com/widget?id=915138780216823849&theme=dark"
-        width="350"
-        height="500"
-        frameBorder="0"
-        sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-      ></iframe>
     </div>
   )
 }

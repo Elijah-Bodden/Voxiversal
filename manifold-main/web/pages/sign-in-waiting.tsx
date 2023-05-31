@@ -1,6 +1,7 @@
 import { Col } from 'web/components/layout/col'
 import { useRedirectIfSignedIn } from 'web/hooks/use-redirect-if-signed-in'
 import { useWindowSize } from 'web/hooks/use-window-size'
+import { LoadingIndicator } from 'web/components/widgets/loading-indicator';
 
 export default function SignInWaiting() {
   useRedirectIfSignedIn()
@@ -8,12 +9,7 @@ export default function SignInWaiting() {
   const { width, height } = useWindowSize()
   return (
     <Col style={{ width, height }} className="items-center justify-center">
-      <img
-        className="mb-6 block -scale-x-100 self-center"
-        src="/logo-flapping-with-money.gif"
-        width={200}
-        height={200}
-      />
+      <LoadingIndicator/>
     </Col>
   )
 }

@@ -27,16 +27,11 @@ import { Pagination } from 'web/components/widgets/pagination'
 import { Title } from 'web/components/widgets/title'
 import {
   NotificationGroup,
-  useGroupedBalanceChangeNotifications,
   useGroupedNonBalanceChangeNotifications,
 } from 'web/hooks/use-notifications'
 import { useIsPageVisible } from 'web/hooks/use-page-visible'
 import { useRedirectIfSignedOut } from 'web/hooks/use-redirect-if-signed-out'
 import { usePrivateUser, useIsAuthorized } from 'web/hooks/use-user'
-import { XIcon } from '@heroicons/react/outline'
-import { updatePrivateUser } from 'web/lib/firebase/users'
-import { getNativePlatform } from 'web/lib/native/is-native'
-import { AppBadgesOrGetAppButton } from 'web/components/buttons/app-badges-or-get-app-button'
 import { LoadingIndicator } from 'web/components/widgets/loading-indicator'
 
 export default function NotificationsPage() {
@@ -44,7 +39,6 @@ export default function NotificationsPage() {
   useRedirectIfSignedOut()
 
   const [navigateToSection, setNavigateToSection] = useState<string>()
-  const { isNative } = getNativePlatform()
   const router = useRouter()
   useEffect(() => {
     if (!router.isReady) return
@@ -54,15 +48,11 @@ export default function NotificationsPage() {
     }
   }, [router.query])
 
-  const shouldShowBanner =
-    privateUser && !privateUser.hasSeenAppBannerInNotificationsOn && !isNative
-
   return (
     <Page>
       <Col className="mx-auto w-full p-2 pb-0">
         <Title className="hidden lg:block">Notifications</Title>
-        <SEO title="Notifications" description="Manifold user notifications" />
-        {shouldShowBanner && <NotificationsAppBanner userId={privateUser.id} />}
+        <SEO title="Notifications" description="Voxiversal user notifications" />
         {privateUser && router.isReady ? (
           <NotificationsContent
             privateUser={privateUser}
@@ -74,35 +64,6 @@ export default function NotificationsPage() {
   )
 }
 
-function NotificationsAppBanner(props: { userId: string }) {
-  const { userId } = props
-  return (
-    <Row className="bg-primary-50 relative mb-2 rounded-md py-2 px-4 text-sm">
-      <XIcon
-        onClick={() =>
-          updatePrivateUser(userId, {
-            hasSeenAppBannerInNotificationsOn: Date.now(),
-          })
-        }
-        className={
-          'bg-canvas-100 absolute -top-1 -right-1 h-4 w-4 cursor-pointer rounded-full sm:p-0.5'
-        }
-      />
-      <span className={'text-ink-600 text-sm sm:text-base'}>
-        <Row className={'items-center'}>
-          We have a mobile app! Get the Manifold icon on your home screen and
-          push notifications (if you want 'em).
-          <Col
-            className={'min-w-fit items-center justify-center p-2 md:flex-row'}
-          >
-            <AppBadgesOrGetAppButton />
-          </Col>
-        </Row>
-      </span>
-    </Row>
-  )
-}
-
 function NotificationsContent(props: {
   privateUser: PrivateUser
   section?: string
@@ -110,10 +71,8 @@ function NotificationsContent(props: {
   const { privateUser, section } = props
   const { groupedNotifications, mostRecentNotification } =
     useGroupedNonBalanceChangeNotifications(privateUser.id)
-  const balanceChangeGroupedNotifications =
-    useGroupedBalanceChangeNotifications(privateUser.id)
 
-  return (
+    return (
     <div className="relative h-full w-full">
       <div className="relative">
         {privateUser && (
@@ -129,14 +88,6 @@ function NotificationsContent(props: {
                     privateUser={privateUser}
                     groupedNotifications={groupedNotifications}
                     mostRecentNotification={mostRecentNotification}
-                  />
-                ),
-              },
-              {
-                title: 'Balance Changes',
-                content: (
-                  <NotificationsList
-                    groupedNotifications={balanceChangeGroupedNotifications}
                   />
                 ),
               },

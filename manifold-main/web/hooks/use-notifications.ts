@@ -102,13 +102,6 @@ export function useGroupedNonBalanceChangeNotifications(userId: string) {
   }, [notifications])
 }
 
-export function useGroupedBalanceChangeNotifications(userId: string) {
-  const notifications = useNotifications(userId)
-  return useMemo(() => {
-    if (!notifications) return undefined
-    return groupBalanceChangeNotifications(notifications)
-  }, [notifications])
-}
 
 export function useGroupedUnseenNotifications(userId: string) {
   const notifications = useUnseenNotifications(userId)
