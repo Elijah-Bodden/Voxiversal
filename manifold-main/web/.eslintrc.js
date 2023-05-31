@@ -21,8 +21,7 @@ module.exports = {
     '@next/next/no-img-element': 'off',
     '@next/next/no-typos': 'off',
     'linebreak-style': [
-      'error',
-      process.platform === 'win32' ? 'windows' : 'unix',
+      'error', 'unix',
     ],
     'lodash/import-scope': [2, 'member'],
     'unused-imports/no-unused-imports': 'warn',

@@ -11,7 +11,7 @@
     "strict": true,
     "target": "es2022",
     "paths": {
-      "common/*": ["./src/*", "../lib/*"]
+      "common/*": ["./src/*", "./config/*", "../lib/*"]
     }
   },
   "include": ["src/**/*.ts"]
