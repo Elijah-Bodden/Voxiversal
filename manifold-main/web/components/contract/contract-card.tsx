@@ -8,7 +8,6 @@ import { memo, ReactNode, useState } from 'react'
 import { Contract, contractPath, CPMMContract } from 'common/contract'
 import { ContractMetric } from 'common/contract-metric'
 import { ContractCardView } from 'common/events'
-import { Group } from 'common/group'
 import { STONK_NO, STONK_YES } from 'common/stonk'
 import { formatMoney } from 'common/util/format'
 import { richTextToString } from 'common/util/parse'
@@ -25,12 +24,9 @@ import { track, trackCallback } from 'web/lib/service/analytics'
 import { fromNow } from 'web/lib/util/time'
 import { BetRow } from '../bet/bet-row'
 import { QuickBet, QuickOutcomeView } from '../bet/quick-bet'
-import { GroupContractOptions } from '../groups/group-contract-options'
-import { groupRoleType } from '../groups/group-member-modal'
 import { Col } from '../layout/col'
 import { Row } from '../layout/row'
 import { Spacer } from '../layout/spacer'
-import { CommentsButton } from '../swipe/swipe-comments'
 import { Avatar } from '../widgets/avatar'
 import { Card } from '../widgets/card'
 import { LoadingIndicator } from '../widgets/loading-indicator'
@@ -59,10 +55,6 @@ export const ContractCard = memo(function ContractCard(props: {
   hideQuestion?: boolean
   hideDetails?: boolean
   numAnswersFR?: number
-  fromGroupProps?: {
-    group: Group
-    userRole: groupRoleType | null
-  }
 }) {
   const {
     showTime,
@@ -77,14 +69,12 @@ export const ContractCard = memo(function ContractCard(props: {
     showImage,
     showDescription,
     children,
-    pinned,
     hideQuestion,
     hideDetails,
     numAnswersFR,
-    fromGroupProps,
   } = props
   const contract = useRealtimeContract(props.contract.id) ?? props.contract
-  const { isResolved, createdTime, featuredLabel, creatorCreatedTime } =
+  const { isResolved, createdTime, creatorCreatedTime } =
     contract
   const { question, outcomeType } = contract
   const { resolution } = contract
@@ -128,21 +118,6 @@ export const ContractCard = memo(function ContractCard(props: {
                 className="text-ink-400 text-sm"
                 createdTime={creatorCreatedTime}
               />
-            </Row>
-            <Row className="gap-1">
-              {pinned && <FeaturedPill label={featuredLabel} />}
-              {/* {isNew && <NewContractBadge />} */}
-              {fromGroupProps &&
-                fromGroupProps.userRole &&
-                (fromGroupProps.userRole == 'admin' ||
-                  fromGroupProps.userRole == 'moderator') && (
-                  <div className="z-20">
-                    <GroupContractOptions
-                      group={fromGroupProps.group}
-                      contract={contract}
-                    />
-                  </div>
-                )}
             </Row>
           </Row>
         )}
@@ -486,7 +461,6 @@ export function ContractCardNew(props: {
               />
             </div>
 
-            <CommentsButton contract={contract} user={user} />
           </Row>
         </Row>
 

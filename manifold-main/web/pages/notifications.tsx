@@ -20,7 +20,6 @@ import {
 } from 'web/components/notifications/notification-helpers'
 import { markAllNotifications } from 'web/lib/firebase/api'
 import { NotificationItem } from 'web/components/notifications/notification-types'
-import { PushNotificationsModal } from 'web/components/push-notifications-modal'
 import { SEO } from 'web/components/SEO'
 import { ShowMoreLessButton } from 'web/components/widgets/collapsible-content'
 import { Pagination } from 'web/components/widgets/pagination'
@@ -195,14 +194,6 @@ function NotificationsList(props: {
           totalItems={groupedNotifications.length}
           page={page}
           setPage={setPage}
-        />
-      )}
-      {privateUser && groupedNotifications && (
-        <PushNotificationsModal
-          privateUser={privateUser}
-          totalNotifications={
-            groupedNotifications.map((ng) => ng.notifications).flat().length
-          }
         />
       )}
     </Col>

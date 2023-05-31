@@ -1,5 +1,4 @@
 import {
-  BalanceChangeNotificationTypes,
   Notification,
   NotificationReason,
 } from 'common/notification'
@@ -112,28 +111,6 @@ export function useGroupedUnseenNotifications(userId: string) {
 
 function groupNotifications(notifications: Notification[]) {
   const sortedNotifications = sortBy(notifications, (n) => -n.createdTime)
-  const notificationGroupsByDayAndContract = groupBy(
-    sortedNotifications,
-    (notification) =>
-      new Date(notification.createdTime).toDateString() +
-      notification.sourceContractId +
-      notification.sourceTitle
-  )
-
-  return Object.entries(notificationGroupsByDayAndContract).map(
-    ([key, value]) => ({
-      notifications: value,
-      groupedById: key,
-      isSeen: value.some((n) => !n.isSeen),
-    })
-  )
-}
-
-function groupBalanceChangeNotifications(notifications: Notification[]) {
-  const sortedNotifications = sortBy(
-    notifications,
-    (n) => -n.createdTime
-  ).filter((n) => BalanceChangeNotificationTypes.includes(n.reason))
   const notificationGroupsByDayAndContract = groupBy(
     sortedNotifications,
     (notification) =>

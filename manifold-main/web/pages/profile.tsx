@@ -1,4 +1,3 @@
-import { RefreshIcon } from '@heroicons/react/outline'
 import { TrashIcon } from '@heroicons/react/solid'
 import { PrivateUser, User } from 'common/user'
 import { cleanDisplayName, cleanUsername } from 'common/util/clean-username'

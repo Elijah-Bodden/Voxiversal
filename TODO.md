@@ -10,3 +10,6 @@
 
 - Even once I've formally adapted this to work for Voxiversal, it will still look and feel distinctly like Manifold. This will be the time to sprinkle in some spice to make it feel like its own app
 - Phase out "discordHandle" as a privateUser field?
+- Do something with server sitemap page
+- Update report user component with appropriate reasons
+- Look at where the stuff in the onboarding component dir is being used. It looks neat, and might be helpful to adapt

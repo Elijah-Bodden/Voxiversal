@@ -8,7 +8,6 @@ import {
   InboxInIcon,
   InformationCircleIcon,
   LightBulbIcon,
-  RefreshIcon,
   TrendingUpIcon,
   UserIcon,
   UsersIcon,
@@ -20,19 +19,15 @@ import {
   notification_destination_types,
   notification_preference,
 } from 'common/user-notification-preferences'
-import { deleteField } from 'firebase/firestore'
 import { uniq } from 'lodash'
 import { memo, ReactNode, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { Button } from 'web/components/buttons/button'
 import { WatchMarketModal } from 'web/components/contract/watch-market-modal'
 import { Col } from 'web/components/layout/col'
 import { Row } from 'web/components/layout/row'
 import { SwitchSetting } from 'web/components/switch-setting'
 
 import { updatePrivateUser } from 'web/lib/firebase/users'
-import { getIsNative } from 'web/lib/native/is-native'
-import { postMessageToNative } from 'web/components/native-message-listener'
 import { UserWatchedContractsButton } from 'web/components/notifications/watched-markets'
 import { useUser } from 'web/hooks/use-user'
 import { usePersistentInMemoryState } from 'web/hooks/use-persistent-in-memory-state'
@@ -45,8 +40,7 @@ export function NotificationSettings(props: {
   const { navigateToSection, privateUser } = props
   const user = useUser()
   const [showWatchModal, setShowWatchModal] = useState(false)
-  const isNative = getIsNative()
-
+ 
   const emailsEnabled: Array<notification_preference> = [
     'all_comments_on_watched_markets',
     'all_replies_to_my_comments_on_watched_markets',
@@ -348,74 +342,9 @@ export function NotificationSettings(props: {
     )
   })
 
-  const PushNotificationsBanner = (props: { privateUser: PrivateUser }) => {
-    const { privateUser } = props
-    const {
-      interestedInPushNotifications,
-      rejectedPushNotificationsOn,
-      pushToken,
-    } = privateUser
-
-    if (
-      interestedInPushNotifications ||
-      pushToken ||
-      (interestedInPushNotifications === undefined &&
-        pushToken === undefined) ||
-      !isNative
-    )
-      return <div />
-
-    // If they only said they weren't interested in push notifications to our modal
-    if (
-      interestedInPushNotifications === false &&
-      !rejectedPushNotificationsOn
-    ) {
-      return (
-        <Row className="text-ink-700 items-center justify-center font-medium">
-          <span className={'bg-ink-100 rounded-md p-2'}>
-            You haven't enabled mobile push notifications.
-            <Button
-              size={'2xs'}
-              className={'ml-2 inline-block whitespace-nowrap'}
-              onClick={() => {
-                updatePrivateUser(privateUser.id, {
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore
-                  interestedInPushNotifications: deleteField(),
-                })
-              }}
-            >
-              Turn on
-            </Button>
-          </span>
-        </Row>
-      )
-    }
-
-    // Otherwise, they rejected the system modal, so they've to re-enable it in their settings
-    return (
-      <Row className="text-ink-700 bg-ink-100 items-center justify-center gap-2 rounded-md p-2 text-sm">
-        <span className={''}>
-          Mobile push notifications are disabled. To enable them, go to your
-          phone's notification settings and turn them on for Manifold. Then tap
-          this button ➡️
-        </span>
-        <Button
-          onClick={() =>
-            postMessageToNative('promptEnablePushNotifications', {})
-          }
-          className={'whitespace-nowrap'}
-        >
-          <RefreshIcon className={'h-4 w-4 '} />
-        </Button>
-      </Row>
-    )
-  }
-
   return (
     <div className={'p-2'}>
       <Col className={'gap-6'}>
-        <PushNotificationsBanner privateUser={privateUser} />
         <Row className={'text-ink-700 gap-2 text-xl'}>
           {user ? (
             <UserWatchedContractsButton user={user} />
