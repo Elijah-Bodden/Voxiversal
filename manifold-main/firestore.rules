@@ -1,0 +1,278 @@
+rules_version = '2';
+
+// To pick the right project: `firebase projects:list`, then `firebase use <project-name>`
+// To deploy: `firebase deploy --only firestore:rules`
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth.token.email in [
+        'akrolsmir@gmail.com',
+        'jahooma@gmail.com',
+        'taowell@gmail.com',
+        'abc.sinclair@gmail.com',
+        'manticmarkets@gmail.com',
+        'iansphilips@gmail.com',
+        'd4vidchee@gmail.com',
+        'ingawei@gmail.com',
+        'marshall@pol.rs'
+      ]
+    }
+
+     match /apr1-auction/{bid} {
+      allow read;
+    }
+
+    match /stats/stats {
+      allow read;
+    }
+
+     match /destiny-subs/{sub} {
+      allow read;
+    }
+
+    match /globalConfig/globalConfig {
+      allow read;
+      allow update: if isAdmin()
+      allow create: if isAdmin()
+    }
+
+    match /users/{userId} {
+      allow read;
+      allow update: if isAdmin();
+      allow update: if userId == request.auth.uid
+                       && request.resource.data.diff(resource.data).affectedKeys()
+                                                                    .hasOnly(['userDeleted', 'bio', 'website', 'twitterHandle', 'discordHandle', 'shouldShowWelcome', 'hasSeenContractFollowModal', 'homeSections', 'optOutAreYouSureWarnings']);
+      // User referral rules
+      allow update: if userId == request.auth.uid
+                         && request.resource.data.diff(resource.data).affectedKeys()
+                          .hasOnly(['referredByUserId', 'referredByContractId', 'referredByGroupId'])
+                          // only one referral allowed per user
+                          && !("referredByUserId" in resource.data)
+                          // user can't refer themselves
+                          && !(userId == request.resource.data.referredByUserId);
+                          // quid pro quos enabled (only once though so nbd) - bc I can't make this work:
+                          // && (get(/databases/$(database)/documents/users/$(request.resource.data.referredByUserId)).referredByUserId == resource.data.id);
+      match /events/{eventId} {
+        allow create: if (request.auth == null && userId == 'NO_USER') || userId == request.auth.uid;
+        allow read: if userId == request.auth.uid || userId == '_';
+      }
+
+      match /weekly-update/{rangeSlug} {
+        allow read;
+      }
+    }
+
+  	match /{somePath=**}/portfolioHistory/{portfolioHistoryId} {
+      allow read;
+    }
+
+    match /{somePath=**}/contract-metrics/{contractId} {
+      allow read;
+    }
+
+    match /{somePath=**}/challenges/{challengeId}{
+      allow read;
+    }
+
+    match /contracts/{contractId}/follows/{userId} {
+      allow read;
+      allow create, delete: if userId == request.auth.uid;
+    }
+
+    match /contracts/{contractId}/challenges/{challengeId}{
+      allow read;
+      allow create: if request.auth.uid == request.resource.data.creatorId;
+      // allow update if there have been no claims yet and if the challenge is still open
+      allow update: if request.auth.uid == resource.data.creatorId;
+    }
+
+    match /users/{userId}/follows/{followUserId} {
+      allow read;
+      allow write: if request.auth.uid == userId;
+    }
+
+    match /{somePath=**}/reactions/{reactionId}{
+      allow read;
+    }
+
+    match /users/{userId}/reactions/{reactionId} {
+      allow read;
+      allow write: if request.auth.uid == userId;
+    }
+
+    match /{somePath=**}/follows/{followUserId} {
+      allow read;
+    }
+
+    match /private-users/{userId} {
+      allow read: if userId == request.auth.uid || isAdmin();
+      allow update: if (userId == request.auth.uid || isAdmin())
+                       && request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['email', 'apiKey', 'notificationPreferences', 'twitchInfo', 'pushToken', 'rejectedPushNotificationsOn', 'blockedUserIds', 'blockedContractIds', 'blockedGroupSlugs','interestedInPushNotifications', 'hasSeenAppBannerInNotificationsOn', 'installedAppPlatforms']);
+    // Symmetric block rules
+      allow update: if (request.auth != null || isAdmin())
+                       && request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['blockedByUserIds'])
+                       && request.resource.data.blockedByUserIds.toSet().difference(resource.data.blockedByUserIds.toSet()).hasOnly([request.auth.uid]);
+
+      allow delete: if (userId == request.auth.uid || isAdmin());
+    }
+
+    match /private-users/{userId}/views/{viewId} {
+      allow create: if userId == request.auth.uid;
+    }
+
+    match /private-users/{userId}/events/{eventId} {
+      allow create: if userId == request.auth.uid;
+    }
+
+    match /private-users/{userId}/latency/{loadTimeId} {
+      allow create: if userId == request.auth.uid;
+    }
+
+    match /private-users/{userId}/cache/{docId} {
+      allow read: if userId == request.auth.uid || isAdmin();
+    }
+
+    match /private-users/{userId}/seenMarkets/{marketId} {
+      allow write: if userId == request.auth.uid;
+      allow read: if userId == request.auth.uid
+    }
+
+     match /stripe-transactions/{transactionId} {
+      allow read: if resource.data.userId == request.auth.uid;
+    }
+
+    match /contracts/{contractId} {
+      allow read: if isAdmin()
+      // allow read if contract is not private
+      allow read: if resource.data.visibility!='private';
+      // allow read if contract is private and user is member of associated private group
+      allow read: if resource.data.visibility=='private' && resource.data.groupLinks!=null && isGroupMember(resource.data.groupLinks[0].groupId);                                                     
+      allow update: if request.resource.data.diff(resource.data).affectedKeys()
+                                                                 .hasOnly(['description', 'closeTime', 'question', 'visibility', 'unlistedById', 'coverImageUrl'])
+                       && resource.data.creatorId == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if request.resource.data.creatorId == request.auth.uid || isAdmin();
+    }
+
+    match /{somePath=**}/bets/{betId} {
+      allow read;
+    }
+
+    match /{somePath=**}/liquidity/{liquidityId} {
+      allow read;
+    }
+
+    function commentMatchesUser(userId, comment) {
+      // it's a bad look if someone can impersonate other ids/names/avatars so check everything
+      let user = get(/databases/$(database)/documents/users/$(userId));
+      return comment.userId == userId
+        && comment.userName == user.data.name
+        && comment.userUsername == user.data.username
+        && comment.userAvatarUrl == user.data.avatarUrl;
+    }
+
+    match /{somePath=**}/comments/{commentId} {
+      allow read;
+    }
+
+    match /{somePath=**}/answers/{answerId} {
+      allow read;
+    }
+
+
+    match /{somePath=**}/followers/{userId} {
+      allow read;
+      allow create, update: if request.auth.uid == userId && request.resource.data.userId == userId;
+      allow delete: if request.auth.uid == userId;
+    }
+
+    match /txns/{txnId} {
+      allow read;
+    }
+
+    match /reports/{reportId} {
+      allow read;
+      allow write: if request.auth.uid == request.resource.data.userId;
+    }
+
+    // Note: `resource` = existing doc, `request.resource` = incoming doc
+    match /manalinks/{slug} {
+      // Anyone can view any manalink
+      allow get;
+      // Only you can create a manalink with your fromId
+      allow create: if request.auth.uid == request.resource.data.fromId;
+      // Only you can list and change your own manalinks
+      allow list, update: if request.auth.uid == resource.data.fromId;
+    }
+
+    match /{somePath=**}/groupMembers/{memberId} {
+      allow read;
+    }
+
+    match /{somePath=**}/groupContracts/{contractId} {
+      allow read;
+    }
+
+    function isGroupMember(groupId) {
+      return exists(/databases/$(database)/documents/groups/$(groupId)/groupMembers/$(request.auth.uid));
+    }
+
+    match /groups/{groupId} {
+      allow read: if (resource.data.privacyStatus!='private' || isGroupMember(groupId) || isAdmin());
+      allow update: if (request.auth.uid == resource.data.creatorId || isAdmin())
+                        && request.resource.data.diff(resource.data)
+                        .affectedKeys()
+                        .hasOnly(['name', 'about', 'aboutPostId', 'pinnedItems','bannerUrl' ]);
+      allow delete: if request.auth.uid == resource.data.creatorId;
+
+      match /groupContracts/{contractId} {
+        allow write: 
+        if (
+        request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.creatorId || 
+        isAdmin() || 
+        (
+        isGroupMember(groupId) && 
+        (
+        get(/databases/$(database)/documents/contracts/$(contractId)).data.creatorId == request.auth.uid || 
+        ['admin','contributor'].includes(get(/databases/$(database)/documents/groups/$(groupId)/groupMembers/$(request.auth.uid)).data.role)
+        )
+        )
+        );
+      }
+
+      match /groupMembers/{memberId}{
+        allow read;
+        allow create: if request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.creatorId || (request.auth.uid == request.resource.data.userId);
+        allow update: if isAdmin() || request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.creatorId || get(/databases/$(database)/documents/groups/$(groupId)/groupMembers/$(request.auth.uid)).data.role == 'admin' || request.auth.uid == resource.data.userId;
+        allow delete: if request.auth.uid == resource.data.userId;
+      }
+
+      match /comments/{commentId} {
+        allow read;
+        allow create: if request.auth != null && commentMatchesUser(request.auth.uid, request.resource.data) && isGroupMember(groupId);
+      }
+    }
+
+      match /posts/{postId} {
+        allow read;
+        allow update: if isAdmin() || request.auth.uid == resource.data.creatorId
+                         && request.resource.data.diff(resource.data)
+                         .affectedKeys()
+                         .hasOnly(['name', 'content', 'isGroupAboutPost']);
+        allow delete: if isAdmin() || request.auth.uid == resource.data.creatorId;
+         match /comments/{commentId} {
+          	allow read;
+            allow create: if request.auth != null && commentMatchesUser(request.auth.uid, request.resource.data) ;
+          }
+      }
+
+      // for testing supabase replication
+      match /test/{id} {
+        allow read;
+        allow write;
+      }
+  }
+}
