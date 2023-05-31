@@ -20,7 +20,6 @@ import { Button } from '../buttons/button'
 import { AddLiquidityButton } from './add-liquidity-button'
 import { Table } from '../widgets/table'
 import { ShareEmbedButton } from '../buttons/share-embed-button'
-import { QRCode } from '../widgets/qr-code'
 import { getShareUrl } from 'common/util/share'
 import { formatTime } from 'web/lib/util/time'
 import { TweetButton } from '../buttons/tweet-button'
@@ -290,8 +289,6 @@ export function ContractInfoDialog(props: {
 }) {
   const { contract, user, open, setOpen } = props
 
-  const shareUrl = getShareUrl(contract, user?.username)
-
   return (
     <Modal open={open} setOpen={setOpen}>
       <Col className="bg-canvas-0 gap-4 rounded p-6">
@@ -339,13 +336,6 @@ export function ContractInfoDialog(props: {
               title: 'Share',
               content: (
                 <Col className="max-h-[400px]">
-                  <QRCode
-                    url={shareUrl}
-                    width={250}
-                    height={250}
-                    className="self-center"
-                  />
-
                   <div className="text-ink-500 mt-4 mb-2 text-base">
                     Invite traders to participate in this market and earn a{' '}
                     {formatMoney(REFERRAL_AMOUNT)} referral bonus for each new

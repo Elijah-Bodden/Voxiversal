@@ -99,8 +99,7 @@ export function ContractTabs(props: {
       contractId: contract.id,
       userId: user === undefined ? 'loading' : user?.id ?? EMPTY_USER,
       filterAntes: true,
-    },
-    true
+    }
   )
 
   const betsTitle =

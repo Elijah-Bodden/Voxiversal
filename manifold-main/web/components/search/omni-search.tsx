@@ -15,7 +15,6 @@ import { db } from 'web/lib/supabase/db'
 import { SearchGroupInfo, searchGroups } from 'web/lib/supabase/groups'
 import { UserSearchResult, searchUsers } from 'web/lib/supabase/users'
 import { ContractStatusLabel } from '../contract/contracts-table'
-import { JoinOrLeaveGroupButton } from '../groups/groups-button'
 import { SORTS, Sort } from '../supabase-search'
 import { Avatar } from '../widgets/avatar'
 import { LoadingIndicator } from '../widgets/loading-indicator'
@@ -218,7 +217,6 @@ const Results = (props: { query: string }) => {
     <>
       <PageResults pages={pageHits} />
       <UserResults users={userHits} search={search} />
-      <GroupResults groups={groupHits} search={search} />
       {sortHit && <MarketSortResults {...sortHit} />}
       <MarketResults markets={marketHits} search={search} />
     </>
@@ -348,42 +346,6 @@ const UserResults = (props: { users: UserSearchResult[]; search?: string }) => {
             {username !== name && (
               <span className="text-ink-400">@{username}</span>
             )}
-          </div>
-        </ResultOption>
-      ))}
-    </>
-  )
-}
-
-const GroupResults = (props: {
-  groups: SearchGroupInfo[]
-  search?: string
-}) => {
-  const me = useUser()
-  const myGroups = useRealtimeMemberGroupIds(me) || []
-  const { search } = props
-  if (!props.groups.length) return null
-  return (
-    <>
-      <SectionTitle link={`/groups?search=${encodeURIComponent(search ?? '')}`}>
-        Groups
-      </SectionTitle>
-      {props.groups.map((group) => (
-        <ResultOption value={{ id: group.id, slug: `/group/${group.slug}` }}>
-          <div className="flex items-center gap-3">
-            <span className="grow">{group.name}</span>
-            <span className="flex items-center">
-              <UsersIcon className="mr-1 h-4 w-4" />
-              {group.totalMembers}
-            </span>
-            <div onClick={(e) => e.stopPropagation()}>
-              <JoinOrLeaveGroupButton
-                group={group}
-                user={me}
-                isMember={myGroups.includes(group.id)}
-                className="w-[80px] !px-0 !py-1"
-              />
-            </div>
           </div>
         </ResultOption>
       ))}

@@ -4,7 +4,6 @@ import { XIcon } from '@heroicons/react/solid'
 
 import { Answer } from 'common/answer'
 import { FreeResponseContract, MultipleChoiceContract } from 'common/contract'
-import { BuyAmountInput } from '../widgets/amount-input'
 import { Col } from '../layout/col'
 import { APIError, placeBet } from 'web/lib/firebase/api'
 import { Row } from '../layout/row'
@@ -134,18 +133,6 @@ export function AnswerBetPanel(props: {
       <Row className="text-ink-500 my-3 justify-between text-left text-sm">
         Amount
       </Row>
-
-      <BuyAmountInput
-        inputClassName="w-full max-w-none"
-        amount={betAmount}
-        onChange={setBetAmount}
-        error={error}
-        setError={setError}
-        disabled={isSubmitting}
-        sliderOptions={{ show: true, wrap: false }}
-        showBalance
-      />
-
       <Col className="mt-8 w-full gap-3">
         <Row className="items-center justify-between text-sm">
           <div className="text-ink-500">Probability</div>
