@@ -1,7 +1,6 @@
 import { removeUndefinedProps } from 'common/util/object'
 import { buildOgUrl } from 'common/util/og'
 import Head from 'next/head'
-import { fqdn } from 'web/../common/config/defs'
 
 export function SEO<P extends Record<string, string | undefined>>(props: {
   title: string
@@ -17,11 +16,11 @@ export function SEO<P extends Record<string, string | undefined>>(props: {
     (ogProps &&
       buildOgUrl(removeUndefinedProps(ogProps.props) as any, ogProps.endpoint))
 
-  const absUrl = 'https://' + fqdn + url
+  const absUrl = 'https://manifold.markets' + url
 
   return (
     <Head>
-      <title>{`${title} | Voxiversal`}</title>
+      <title>{`${title} | Manifold Markets`}</title>
 
       <meta
         property="og:title"
@@ -38,7 +37,14 @@ export function SEO<P extends Record<string, string | undefined>>(props: {
       />
 
       {url && <meta property="og:url" content={absUrl} key="url" />}
-      
+
+      {url && (
+        <meta
+          name="apple-itunes-app"
+          content={'app-id=6444136749, app-argument=' + absUrl}
+        />
+      )}
+
       {imageUrl && (
         <>
           <meta property="og:image" content={imageUrl} key="image1" />

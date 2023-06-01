@@ -1,3 +1,4 @@
+import { ExternalLinkIcon } from '@heroicons/react/outline'
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/solid'
 import dayjs from 'dayjs'
 import router from 'next/router'
@@ -12,13 +13,15 @@ import {
 } from 'common/contract'
 import { ANTES, UNIQUE_BETTOR_BONUS_AMOUNT } from 'common/economy'
 import { ENV_CONFIG } from 'common/envs/constants'
-import { Group} from 'common/group'
+import { Group, groupPath } from 'common/group'
 import { User } from 'common/user'
 import { formatMoney } from 'common/util/format'
 import { removeUndefinedProps } from 'common/util/object'
 import { MINUTE_MS } from 'common/util/time'
+import { AddFundsModal } from 'web/components/add-funds-modal'
 import { MultipleChoiceAnswers } from 'web/components/answers/multiple-choice-answers'
 import { Button } from 'web/components/buttons/button'
+import { GroupSelector } from 'web/components/groups/group-selector'
 import { Row } from 'web/components/layout/row'
 import { Spacer } from 'web/components/layout/spacer'
 import { Checkbox } from 'web/components/widgets/checkbox'
@@ -65,7 +68,7 @@ export function NewContractPanel(props: {
   fromGroup?: boolean
   className?: string
 }) {
-  const { creator, params, className } = props
+  const { creator, params, fromGroup, className } = props
   const {
     question,
     setQuestion,
@@ -91,6 +94,8 @@ export function NewContractPanel(props: {
     setIsLogScale,
     answers,
     setAnswers,
+    selectedGroup,
+    setSelectedGroup,
     visibility,
     setVisibility,
     submit,
@@ -107,7 +112,7 @@ export function NewContractPanel(props: {
     true,
     'new-hide-options'
   )
-  const [_fundsModalOpen, setFundsModalOpen] = useState(false)
+  const [fundsModalOpen, setFundsModalOpen] = useState(false)
 
   return (
     <div className={clsx(className, 'text-ink-1000')}>
@@ -285,6 +290,25 @@ export function NewContractPanel(props: {
             </>
           )}
 
+          {!fromGroup && visibility != 'private' && (
+            <>
+              <Row className={'items-end gap-x-2'}>
+                <GroupSelector
+                  selectedGroup={selectedGroup}
+                  setSelectedGroup={setSelectedGroup}
+                  options={{ showSelector: true, showLabel: true }}
+                  isContractCreator={true}
+                />
+                {selectedGroup && (
+                  <a target="_blank" href={groupPath(selectedGroup.slug)}>
+                    <ExternalLinkIcon className=" text-ink-500 ml-1 mb-3 h-5 w-5" />
+                  </a>
+                )}
+              </Row>
+              <Spacer h={6} />
+            </>
+          )}
+
           {outcomeType !== 'STONK' && (
             <div className="mb-1 flex flex-col items-start">
               <label className="mb-1 gap-2 px-1 py-2">
@@ -403,6 +427,10 @@ export function NewContractPanel(props: {
               >
                 Get {ENV_CONFIG.moneyMoniker}
               </Button>
+              <AddFundsModal
+                open={fundsModalOpen}
+                setOpen={setFundsModalOpen}
+              />
             </div>
           )}
         </div>

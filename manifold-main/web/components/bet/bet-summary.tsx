@@ -7,6 +7,7 @@ import { Row } from '../layout/row'
 import { YesLabel, NoLabel } from '../outcome-label'
 import { getContractBetMetrics, getProbability } from 'common/calculate'
 import { InfoTooltip } from '../widgets/info-tooltip'
+import { ProfitBadge } from '../profit-badge'
 import { useSavedContractMetrics } from 'web/hooks/use-saved-contract-metrics'
 import { ContractMetric } from 'common/contract-metric'
 import { useUserContractBets } from 'web/hooks/use-user-bets'
@@ -37,7 +38,7 @@ export function BetsSummary(props: {
   const userBets = useUserContractBets(metrics.userId, contract.id)
   const username = metrics.userUsername
 
-  const { payout, invested, totalShares, profit } = userBets
+  const { payout, invested, totalShares, profit, profitPercent } = userBets
     ? getContractBetMetrics(contract, userBets)
     : metrics
 
@@ -62,6 +63,7 @@ export function BetsSummary(props: {
             <div className="text-ink-500 text-sm">Payout</div>
             <div className="whitespace-nowrap">
               {formatMoney(payout)}{' '}
+              <ProfitBadge profitPercent={profitPercent} />
             </div>
           </Col>
         ) : isStonk ? (
@@ -133,6 +135,7 @@ export function BetsSummary(props: {
           </div>
           <div className="whitespace-nowrap">
             {formatMoney(profit)}
+            <ProfitBadge profitPercent={profitPercent} />
           </div>
         </Col>
       </Row>

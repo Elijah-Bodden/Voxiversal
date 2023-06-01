@@ -4,12 +4,16 @@ import { User } from 'web/lib/firebase/users'
 import { formatMoney } from 'common/util/format'
 import { Avatar } from '../widgets/avatar'
 import { trackCallback } from 'web/lib/service/analytics'
+import { useState } from 'react'
+import { AddFundsModal } from '../add-funds-modal'
+import { PlusIcon } from '@heroicons/react/outline'
 import { animated } from '@react-spring/web'
 import { useAnimatedNumber } from 'web/hooks/use-animated-number'
 
 export function ProfileSummary(props: { user: User }) {
   const { user } = props
 
+  const [buyModalOpen, setBuyModalOpen] = useState(false)
   const balance = useAnimatedNumber(user.balance)
 
   return (
@@ -25,6 +29,17 @@ export function ProfileSummary(props: { user: User }) {
           <span className="mr-2">
             <animated.div>{balance.to((b) => formatMoney(b))}</animated.div>
           </span>
+          <button
+            className="hover:bg-ink-300 rounded-md p-1 ring-[1.5px] ring-inset ring-current"
+            onClick={(e) => {
+              e.preventDefault()
+              setBuyModalOpen(true)
+            }}
+          >
+            <div className="sr-only">Get mana</div>
+            <PlusIcon className="h-2 w-2" strokeWidth="4.5" />
+          </button>
+          <AddFundsModal open={buyModalOpen} setOpen={setBuyModalOpen} />
         </div>
       </div>
     </Link>

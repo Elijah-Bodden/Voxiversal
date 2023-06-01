@@ -80,7 +80,7 @@ export const PROD_CONFIG: EnvConfig = {
   bettor: 'trader',
   verbPastBet: 'traded',
   nounBet: 'trade',
-  faviconPath: '/favicon.svg',
+  faviconPath: '/favicon.ico',
   newQuestionPlaceholders: [
     'Will anyone I know get engaged this year?',
     'Will humans set foot on Mars by the end of 2030?',

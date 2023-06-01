@@ -1,15 +1,19 @@
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
-import { fqdn } from 'web/../common/config/defs'
 import Script from 'next/script'
 import { useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { AuthProvider, AuthUser } from 'web/components/auth-context'
 import { DarkModeProvider } from 'web/components/dark-mode-provider'
+import {
+  NativeMessageListener,
+  postMessageToNative,
+} from 'web/components/native-message-listener'
 import Welcome from 'web/components/onboarding/welcome'
 import { SearchProvider } from 'web/components/search/search-context'
 import { useHasLoaded } from 'web/hooks/use-has-loaded'
 import '../styles/globals.css'
+import { getIsNative } from 'web/lib/native/is-native'
 import { Major_Mono_Display, Figtree } from 'next/font/google'
 import { GoogleOneTapSetup } from 'web/lib/firebase/google-onetap-login'
 import clsx from 'clsx'
@@ -33,6 +37,19 @@ function firstLine(msg: string) {
   return msg.replace(/\r?\n.*/s, '')
 }
 
+// It can be very hard to see client logs on native, so send them manually
+if (getIsNative()) {
+  const log = console.log.bind(console)
+  console.log = (...args) => {
+    postMessageToNative('log', { args })
+    log(...args)
+  }
+  console.error = (...args) => {
+    postMessageToNative('log', { args })
+    log(...args)
+  }
+}
+
 function printBuildInfo() {
   // These are undefined if e.g. dev server
   if (process.env.NEXT_PUBLIC_VERCEL_ENV) {
@@ -47,45 +64,46 @@ function printBuildInfo() {
 }
 
 // specially treated props that may be present in the server/static props
-type VoxiversalPageProps = { auth?: AuthUser }
+type ManifoldPageProps = { auth?: AuthUser }
 
-function MyApp({ Component, pageProps }: AppProps<VoxiversalPageProps>) {
+function MyApp({ Component, pageProps }: AppProps<ManifoldPageProps>) {
   useEffect(printBuildInfo, [])
   useHasLoaded()
 
   return (
     <>
       <Head>
-        <title>Voxiversal</title>
+        <title>Manifold Markets</title>
 
         <meta
           property="og:title"
           name="twitter:title"
-          content="Voxiversal"
+          content="Manifold Markets"
           key="title"
         />
         <meta
           name="description"
-          content="The world's voice for AI safety"
+          content="Create your own prediction market. Unfold the future."
           key="description1"
         />
         <meta
           property="og:description"
           name="twitter:description"
-          content="The world's voice for AI safety"
+          content="Create your own prediction market. Unfold the future."
           key="description2"
         />
-        <meta property="og:url" content={"https://" + fqdn} key="url" />
-        <meta property="og:site_name" content="Voxiversal" />
+        <meta property="og:url" content="https://manifold.markets" key="url" />
+        <meta property="og:site_name" content="Manifold Markets" />
         <meta name="twitter:card" content="summary" key="card" />
+        <meta name="twitter:site" content="@manifoldmarkets" />
         <meta
           name="twitter:image"
-          content={"https://" + fqdn + "/images/card.png"}
+          content="https://manifold.markets/logo-white.png"
           key="image2"
         />
         <meta
           property="og:image"
-          content={"https://" + fqdn + "/images/card.png"}
+          content="https://manifold.markets/logo-cover.png"
           key="image1"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -93,8 +111,8 @@ function MyApp({ Component, pageProps }: AppProps<VoxiversalPageProps>) {
         <link
           rel="search"
           type="application/opensearchdescription+xml"
-          href={"https://" + fqdn + "/opensearch.xml"}
-          title="Voxiversal"
+          href="https://manifold.markets/opensearch.xml"
+          title="Manifold Markets"
         />
       </Head>
       <div
@@ -106,6 +124,7 @@ function MyApp({ Component, pageProps }: AppProps<VoxiversalPageProps>) {
       >
         <AuthProvider serverUser={pageProps.auth}>
           <DarkModeProvider>
+            <NativeMessageListener />
             <QueryClientProvider client={queryClient}>
               <SearchProvider>
                 <Welcome />
@@ -119,10 +138,25 @@ function MyApp({ Component, pageProps }: AppProps<VoxiversalPageProps>) {
           <div />
         </div>
       </div>
-      {/* Umami, for pageview analytics on https://analytics.umami.is/share/fBoBiEjLiZT0KT0l/Voxiversal */}
+      {/* Umami, for pageview analytics on https://analytics.umami.is/share/ARwUIC9GWLNyowjq/Manifold%20Markets */}
       <Script
         src="https://analytics.umami.is/script.js"
-        data-website-id="67561492-8262-4bec-9075-425dee4990cb"
+        data-website-id="ee5d6afd-5009-405b-a69f-04e3e4e3a685"
+      />
+      {/* Hotjar, for recording user sessions */}
+      <Script
+        id="hotjar"
+        dangerouslySetInnerHTML={{
+          __html: `
+    (function(h,o,t,j,a,r){
+        h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+        h._hjSettings={hjid:2968940,hjsv:6};
+        a=o.getElementsByTagName('head')[0];
+        r=o.createElement('script');r.async=1;
+        r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+        a.appendChild(r);
+    })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');`,
+        }}
       />
       <GoogleOneTapSetup />
     </>

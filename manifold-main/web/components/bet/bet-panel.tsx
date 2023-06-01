@@ -22,6 +22,7 @@ import { getBinaryBetStats, getBinaryCpmmBetInfo } from 'common/new-bet'
 import { User } from 'web/lib/firebase/users'
 import { LimitBet } from 'common/bet'
 import { APIError, placeBet } from 'web/lib/firebase/api'
+import { BuyAmountInput } from '../widgets/amount-input'
 import {
   BinaryOutcomeLabel,
   HigherLabel,

@@ -1,3 +1,4 @@
+import { RefreshIcon } from '@heroicons/react/outline'
 import { TrashIcon } from '@heroicons/react/solid'
 import { PrivateUser, User } from 'common/user'
 import { cleanDisplayName, cleanUsername } from 'common/util/clean-username'
@@ -13,13 +14,10 @@ import { LoadingIndicator } from 'web/components/widgets/loading-indicator'
 import { Page } from 'web/components/layout/page'
 import { SEO } from 'web/components/SEO'
 import { Title } from 'web/components/widgets/title'
+import { generateNewApiKey } from 'web/lib/api/api-key'
 import { changeUserInfo } from 'web/lib/firebase/api'
 import { redirectIfLoggedOut } from 'web/lib/firebase/server-auth'
 import { uploadImage } from 'web/lib/firebase/storage'
-
-// PLACEHOLDER!!!! PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER
-// Glad I got your attention. Look below here. Those firebase user-data-related functions and their uses throughout the fiele are a great example of the kind of thing I'll need to change when migrating to supabase. Look through these imports; anywhere you see something firebase-related, dump it and implement supabase. Do likewise for every other file in the project.
-
 import {
   auth,
   getUserAndPrivateUser,
@@ -82,6 +80,7 @@ export default function ProfilePage(props: {
   const [avatarLoading, setAvatarLoading] = useState(false)
   const [name, setName] = useState(user.name)
   const [username, setUsername] = useState(user.username)
+  const [apiKey, setApiKey] = useState(privateUser.apiKey || '')
   const [deleteAccountConfirmation, setDeleteAccountConfirmation] = useState('')
   const [loadingName, setLoadingName] = useState(false)
   const [loadingUsername, setLoadingUsername] = useState(false)
@@ -126,6 +125,17 @@ export default function ProfilePage(props: {
         setUsername(user.username)
       })
     setLoadingUsername(false)
+  }
+
+  const updateApiKey = async (e?: React.MouseEvent) => {
+    const newApiKey = await generateNewApiKey(user.id)
+    setApiKey(newApiKey ?? '')
+    e?.preventDefault()
+
+    if (!privateUser.twitchInfo) return
+    await updatePrivateUser(privateUser.id, {
+      twitchInfo: { ...privateUser.twitchInfo, needsRelinking: true },
+    })
   }
 
   const deleteAccount = async () => {
@@ -278,6 +288,49 @@ export default function ProfilePage(props: {
                 updateUser(user.id, { optOutBetWarnings: !enabled })
               }}
             />
+          </div>
+
+          <div>
+            <label className="mb-1 block">API key</label>
+            <div className="flex w-full items-stretch space-x-1">
+              <Input
+                type="text"
+                placeholder="Click refresh to generate key"
+                value={apiKey}
+                readOnly
+              />
+              <ConfirmationButton
+                openModalBtn={{
+                  className: 'p-2',
+                  label: '',
+                  icon: <RefreshIcon className="h-5 w-5" />,
+                  color: 'indigo',
+                }}
+                submitBtn={{
+                  label: 'Update key',
+                }}
+                onSubmitWithSuccess={async () => {
+                  updateApiKey()
+                  return true
+                }}
+              >
+                <Col>
+                  <Title children={'Are you sure?'} />
+                  <div>
+                    Updating your API key will break any existing applications
+                    connected to your account, <b>including the Twitch bot</b>.
+                    You will need to go to the{' '}
+                    <Link
+                      href="/twitch"
+                      className="underline focus:outline-none"
+                    >
+                      Twitch page
+                    </Link>{' '}
+                    to relink your account.
+                  </div>
+                </Col>
+              </ConfirmationButton>
+            </div>
           </div>
           <div>
             <label className="mb-1 block">Delete Account</label>

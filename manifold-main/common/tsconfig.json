@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "rootDir": ".",
+    "rootDir": "src",
     "composite": true,
     "module": "commonjs",
     "moduleResolution": "node",
@@ -11,8 +11,8 @@
     "strict": true,
     "target": "es2022",
     "paths": {
-      "common/*": ["./src/*", "./config/*", "../lib/*"]
+      "common/*": ["./src/*", "../lib/*"]
     }
   },
-  "include": ["src/**/*.ts", "config/*.ts"],
+  "include": ["src/**/*.ts"]
 }

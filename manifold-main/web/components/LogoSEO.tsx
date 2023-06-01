@@ -1,5 +1,4 @@
 import Head from 'next/head'
-import { fqdn } from 'web/../common/config/defs'
 
 export function LogoSEO() {
   return (
@@ -10,9 +9,9 @@ export function LogoSEO() {
           __html: `{
       "@context": "https://schema.org",
       "@type": "Corporation",
-      "url": "https://${fqdn}",
-      "logo": "https://${fqdn}/logo.svg",
-      "description": "The world's voice for AI safety."
+      "url": "https://manifold.markets",
+      "logo": "https://manifold.markets/logo.svg",
+      "description": "Create your own prediction market. Unfold the future."
     }`,
         }}
       />

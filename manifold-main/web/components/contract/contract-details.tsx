@@ -19,6 +19,7 @@ import { useUser } from 'web/hooks/use-user'
 import { Button } from 'web/components/buttons/button'
 import { Modal } from 'web/components/layout/modal'
 import { Col } from 'web/components/layout/col'
+import { ContractGroupsList } from 'web/components/groups/contract-groups-list'
 import { linkClass } from 'web/components/widgets/site-link'
 import { UserLink } from 'web/components/widgets/user-link'
 import { Tooltip } from 'web/components/widgets/tooltip'
@@ -210,6 +211,7 @@ function PublicMarketGroups(props: { contract: Contract }) {
             'bg-canvas-0 max-h-[70vh] min-h-[20rem] overflow-auto rounded p-6'
           }
         >
+          <ContractGroupsList contract={contract} user={user} />
         </Col>
       </Modal>
     </>

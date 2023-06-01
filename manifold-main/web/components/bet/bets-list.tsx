@@ -53,6 +53,8 @@ import { Col } from '../layout/col'
 import { Row } from '../layout/row'
 import { Spacer } from '../layout/spacer'
 import { OutcomeLabel } from '../outcome-label'
+import { AddFundsButton } from '../profile/add-funds-button'
+import { ProfitBadge } from '../profit-badge'
 import { LoadingIndicator } from '../widgets/loading-indicator'
 import { Pagination } from '../widgets/pagination'
 import { Select } from '../widgets/select'
@@ -229,6 +231,10 @@ export function BetsList(props: { user: User }) {
     (c) => !c.isResolved && nullableMetricsByContract[c.id].invested !== 0
   )
 
+  const currentInvested = sumBy(
+    unsettled,
+    (c) => nullableMetricsByContract[c.id].invested
+  )
   const currentBetsValue = sumBy(
     unsettled,
     (c) => nullableMetricsByContract[c.id].payout
@@ -237,6 +243,9 @@ export function BetsList(props: { user: User }) {
     unsettled,
     (c) => nullableMetricsByContract[c.id].loan
   )
+
+  const investedProfitPercent =
+    ((currentBetsValue - currentInvested) / (currentInvested + 0.1)) * 100
 
   return (
     <Col>
@@ -248,6 +257,7 @@ export function BetsList(props: { user: User }) {
             </div>
             <div className="text-lg">
               {formatMoney(currentBetsValue)}{' '}
+              <ProfitBadge profitPercent={investedProfitPercent} />
             </div>
           </Col>
           <Col className={'shrink-0'}>
@@ -255,6 +265,10 @@ export function BetsList(props: { user: User }) {
             <div className="text-lg">{formatMoney(currentLoan)}</div>
           </Col>
 
+          <AddFundsButton
+            userId={user.id}
+            className="ml-2 self-center sm:hidden"
+          />
         </Row>
 
         <div className="flex grow gap-2 max-[480px]:flex-col">
@@ -377,7 +391,7 @@ function ContractBets(props: {
   const isBinary = outcomeType == 'BINARY'
   const isClosed = closeTime && closeTime < Date.now()
 
-  const { payout, profit } = metrics
+  const { payout, profit, profitPercent } = metrics
 
   return (
     <div tabIndex={0} className="bg-canvas-0 relative p-4 pr-6">
@@ -435,6 +449,7 @@ function ContractBets(props: {
           <div className="whitespace-nowrap text-right text-lg">
             {formatMoney(displayMetric === 'profit' ? profit : payout)}
           </div>
+          <ProfitBadge className="text-right" profitPercent={profitPercent} />
         </Col>
       </Row>
 

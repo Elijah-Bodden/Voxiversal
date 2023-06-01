@@ -9,6 +9,7 @@ import {
   SparklesIcon,
   StarIcon,
   UserGroupIcon,
+  FireIcon,
   QuestionMarkCircleIcon,
 } from '@heroicons/react/outline'
 // import { GiftIcon, MapIcon, MoonIcon } from '@heroicons/react/solid'
@@ -17,6 +18,8 @@ import { buildArray } from 'common/util/array'
 import { capitalize } from 'lodash'
 import Router, { useRouter } from 'next/router'
 import { useContext, useState } from 'react'
+import { AddFundsModal } from 'web/components/add-funds-modal'
+import { AppBadgesOrGetAppButton } from 'web/components/buttons/app-badges-or-get-app-button'
 import { CreateQuestionButton } from 'web/components/buttons/create-question-button'
 import NotificationsIcon from 'web/components/notifications-icon'
 import { DarkModeContext, useIsDarkMode } from 'web/hooks/dark-mode-context'
@@ -24,11 +27,13 @@ import { useUser } from 'web/hooks/use-user'
 import { firebaseLogout } from 'web/lib/firebase/users'
 import TrophyIcon from 'web/lib/icons/trophy-icon'
 import { withTracking } from 'web/lib/service/analytics'
+import { MobileAppsQRCodeDialog } from '../buttons/mobile-apps-qr-code-button'
 import { SignInButton } from '../buttons/sign-in-button'
-import { VoxiversalLogo } from './voxiversal-logo'
+import { ManifoldLogo } from './manifold-logo'
 import { ProfileSummary } from './profile-menu'
 import { SearchButton } from './search-button'
 import { SidebarItem } from './sidebar-item'
+import { getIsNative } from 'web/lib/native/is-native'
 
 export default function Sidebar(props: {
   className?: string
@@ -39,7 +44,7 @@ export default function Sidebar(props: {
   const currentPage = router.asPath
 
   const user = useUser()
-  const [_isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [isAddFundsModalOpen, setIsAddFundsModalOpen] = useState(false)
 
   const { theme, changeTheme } = useContext(DarkModeContext)
@@ -68,7 +73,7 @@ export default function Sidebar(props: {
       aria-label="Sidebar"
       className={clsx('flex h-screen flex-col xl:ml-2', className)}
     >
-      <VoxiversalLogo className="py-6" twoLine />
+      <ManifoldLogo className="py-6" twoLine />
 
       {user === undefined && <div className="h-[56px]" />}
 
@@ -81,15 +86,26 @@ export default function Sidebar(props: {
           <SidebarItem key={item.name} item={item} currentPage={currentPage} />
         ))}
 
+        <MobileAppsQRCodeDialog
+          key="mobile-apps-qr-code"
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+        />
+
         {user === null && <SignInButton />}
 
         {createMarketButton}
       </div>
       <div className="mt-auto mb-6 flex flex-col gap-1">
+        {user !== null && <AppBadgesOrGetAppButton hideOnDesktop={true} />}
         {bottomNavOptions.map((item) => (
           <SidebarItem key={item.name} item={item} currentPage={currentPage} />
         ))}
       </div>
+      <AddFundsModal
+        open={isAddFundsModalOpen}
+        setOpen={setIsAddFundsModalOpen}
+      />
     </nav>
   )
 }
@@ -134,6 +150,7 @@ const getDesktopNav = (loggedIn: boolean, openDownloadApp: () => void) => {
 const getMobileNav = (toggleModal: () => void) => {
   return buildArray(
     { name: 'Markets', href: '/markets', icon: ScaleIcon },
+    getIsNative() && { name: 'Swipe', href: '/swipe', icon: FireIcon },
     { name: 'Leagues', href: '/leagues', icon: TrophyIcon },
     {
       name: 'Groups',

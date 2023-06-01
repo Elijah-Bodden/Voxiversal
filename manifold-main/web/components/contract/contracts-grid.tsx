@@ -7,6 +7,7 @@ import { ShowTime } from './contract-details'
 import { LoadingIndicator } from '../widgets/loading-indicator'
 import { LoadMoreUntilNotVisible } from '../widgets/visibility-observer'
 import { Group } from 'common/group'
+import { groupRoleType } from '../groups/group-member-modal'
 
 export function ContractsGrid(props: {
   contracts: Contract[] | undefined
@@ -23,6 +24,7 @@ export function ContractsGrid(props: {
   breakpointColumns?: { [key: string]: number }
   fromGroupProps?: {
     group: Group
+    userRole: groupRoleType | null
   }
 }) {
   const {
@@ -33,6 +35,7 @@ export function ContractsGrid(props: {
     cardUIOptions,
     highlightContractIds,
     trackingPostfix,
+    fromGroupProps,
   } = props
   const { hideQuickBet, hideGroupLink, noLinkAvatar } = cardUIOptions || {}
   if (contracts === undefined) {
@@ -68,6 +71,7 @@ export function ContractsGrid(props: {
               highlightContractIds?.includes(contract.id) &&
                 'via-ink-0to-ink-0bg-gradient-to-b from-primary-50 outline-primary-400 outline outline-2'
             )}
+            fromGroupProps={fromGroupProps}
           >
             {contract.mechanism === 'cpmm-1' ? (
               <ContractMetricsFooter contract={contract} />

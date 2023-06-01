@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-export type SpinnerSize = 'sm' | 'md' | 'lg' | 'page'
+export type SpinnerSize = 'sm' | 'md' | 'lg'
 
 function getSizeClass(size: SpinnerSize) {
   switch (size) {
@@ -7,8 +7,6 @@ function getSizeClass(size: SpinnerSize) {
       return 'h-4 w-4 border-2'
     case 'md':
       return 'h-6 w-6 border-4'
-    case 'page':
-      return 'h-52 w-52 border-8'
     case 'lg':
     default:
       return 'h-8 w-8 border-4'

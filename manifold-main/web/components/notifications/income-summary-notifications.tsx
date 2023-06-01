@@ -1,4 +1,5 @@
 import {
+  BETTING_STREAK_BONUS_MAX,
   UNIQUE_BETTOR_BONUS_AMOUNT,
 } from 'common/economy'
 import {
@@ -12,6 +13,9 @@ import { groupBy } from 'lodash'
 import { useState } from 'react'
 
 import { UserLink } from 'web/components/widgets/user-link'
+import { useUser } from 'web/hooks/use-user'
+import { BettingStreakModal } from '../profile/betting-streak-modal'
+import { LoansModal } from '../profile/loans-modal'
 import {
   AvatarNotificationIcon,
   NotificationFrame,
@@ -20,6 +24,9 @@ import {
   QuestionOrGroupLink,
 } from './notification-helpers'
 import { MultipleAvatarIcons } from './notification-types'
+import { QuestRewardTxn } from 'common/txn'
+import { QUEST_DETAILS } from 'common/quest'
+import { QuestsModal } from '../quests-or-streak'
 import { Modal } from 'web/components/layout/modal'
 import { Col } from 'web/components/layout/col'
 import { Row } from 'web/components/layout/row'
@@ -121,6 +128,150 @@ export function UniqueBettorBonusIncomeNotification(props: {
         open={open}
         setOpen={setOpen}
       />
+    </NotificationFrame>
+  )
+}
+export function QuestIncomeNotification(props: {
+  notification: Notification
+  highlighted: boolean
+  setHighlighted: (highlighted: boolean) => void
+}) {
+  const { notification, highlighted, setHighlighted } = props
+  const { data } = notification
+  const { questType } = data as QuestRewardTxn['data']
+  const user = useUser()
+  const [open, setOpen] = useState(false)
+  return (
+    <NotificationFrame
+      notification={notification}
+      highlighted={highlighted}
+      setHighlighted={setHighlighted}
+      isChildOfGroup={true}
+      icon={
+        <NotificationIcon
+          symbol={'🧭'}
+          symbolBackgroundClass={
+            'bg-gradient-to-br from-primary-500 to-primary-300'
+          }
+        />
+      }
+      onClick={() => setOpen(true)}
+    >
+      <span className="line-clamp-3">
+        <IncomeNotificationLabel notification={notification} /> Bonus for{' '}
+        <PrimaryNotificationLink
+          text={`completing the ${QUEST_DETAILS[questType].title} quest`}
+        />
+      </span>
+      {user && <QuestsModal open={open} setOpen={setOpen} user={user} />}
+    </NotificationFrame>
+  )
+}
+
+export function BettingStreakBonusIncomeNotification(props: {
+  notification: Notification
+  highlighted: boolean
+  setHighlighted: (highlighted: boolean) => void
+}) {
+  const { notification, highlighted, setHighlighted } = props
+  const { sourceText } = notification
+  const [open, setOpen] = useState(false)
+  const user = useUser()
+  const streakInDays = notification.data?.streak
+  return (
+    <NotificationFrame
+      notification={notification}
+      highlighted={highlighted}
+      setHighlighted={setHighlighted}
+      isChildOfGroup={true}
+      icon={
+        <NotificationIcon
+          symbol={'🔥'}
+          symbolBackgroundClass={
+            'bg-gradient-to-br from-primary-600 to-primary-300'
+          }
+        />
+      }
+      onClick={() => setOpen(true)}
+    >
+      <span className="line-clamp-3">
+        <IncomeNotificationLabel notification={notification} />{' '}
+        {sourceText && +sourceText === BETTING_STREAK_BONUS_MAX && (
+          <span>(max) </span>
+        )}
+        Bonus for your {sourceText && <span>🔥 {streakInDays} day</span>}{' '}
+        <PrimaryNotificationLink text="Prediction Streak" />
+      </span>
+      <BettingStreakModal isOpen={open} setOpen={setOpen} currentUser={user} />
+    </NotificationFrame>
+  )
+}
+export function BettingStreakExpiringNotification(props: {
+  notification: Notification
+  highlighted: boolean
+  setHighlighted: (highlighted: boolean) => void
+}) {
+  const { notification, highlighted, setHighlighted } = props
+  const [open, setOpen] = useState(false)
+  const user = useUser()
+  const streakInDays = notification.data?.streak
+  return (
+    <NotificationFrame
+      notification={notification}
+      highlighted={highlighted}
+      setHighlighted={setHighlighted}
+      isChildOfGroup={true}
+      icon={
+        <NotificationIcon
+          symbol={'⏰'}
+          symbolBackgroundClass={
+            'bg-gradient-to-br from-yellow-600 to-orange-300'
+          }
+        />
+      }
+      onClick={() => setOpen(true)}
+      subtitle={'Place a prediction in the next 3 hours to keep it.'}
+    >
+      <span className="line-clamp-3">
+        Don't let your <span>🔥 {streakInDays} day</span>{' '}
+        <PrimaryNotificationLink text="Prediction Streak" /> expire!
+      </span>
+      <BettingStreakModal isOpen={open} setOpen={setOpen} currentUser={user} />
+    </NotificationFrame>
+  )
+}
+
+export function LoanIncomeNotification(props: {
+  notification: Notification
+  highlighted: boolean
+  setHighlighted: (highlighted: boolean) => void
+}) {
+  const { notification, highlighted, setHighlighted } = props
+  const [open, setOpen] = useState(false)
+  return (
+    <NotificationFrame
+      notification={notification}
+      highlighted={highlighted}
+      setHighlighted={setHighlighted}
+      isChildOfGroup={true}
+      icon={
+        <NotificationIcon
+          symbol={'🏦'}
+          symbolBackgroundClass={
+            'bg-gradient-to-br from-green-600 to-green-300'
+          }
+        />
+      }
+      onClick={() => setOpen(true)}
+    >
+      <span>
+        <IncomeNotificationLabel notification={notification} /> of your invested
+        predictions returned as a{' '}
+        <span>
+          <PrimaryNotificationLink text="Loan" />
+        </span>
+      </span>
+      <LoansModal isOpen={open} setOpen={setOpen} />
     </NotificationFrame>
   )
 }

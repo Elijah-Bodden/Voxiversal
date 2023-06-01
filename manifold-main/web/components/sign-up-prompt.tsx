@@ -15,13 +15,12 @@ export function BetSignUpPrompt(props: {
 
   return user === null ? (
     <Button
-      // PLACEHOLDER I have no idea what withTracking even does, so I'm just leaving the following line for the time being.
       onClick={withTracking(firebaseLogin, 'sign up to bet')}
       className={className}
       size={size}
       color="gradient"
     >
-      {label ?? 'Sign up to talk'}
+      {label ?? 'Sign up to trade'}
     </Button>
   ) : null
 }

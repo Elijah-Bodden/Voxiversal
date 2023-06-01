@@ -10,6 +10,7 @@ import {
   LivePillOptions,
   pill_options,
 } from 'web/components/activity-log'
+import { DailyStats } from 'web/components/daily-stats'
 import { Col } from 'web/components/layout/col'
 import { Page } from 'web/components/layout/page'
 import { Row } from 'web/components/layout/row'
@@ -66,6 +67,7 @@ function HomeDashboard() {
       <Col className="mx-auto w-full max-w-2xl gap-6 pb-8 sm:px-2 lg:pr-4">
         <Row className={'w-full items-center justify-between gap-4'}>
           <Title children="Home" className="!my-0" />
+          <DailyStats user={user} />
         </Row>
 
         {isLoading && <LoadingIndicator />}
@@ -89,6 +91,7 @@ function MobileHome() {
       <Col className="gap-2 py-2 pb-8 sm:px-2">
         <Row className="mx-4 mb-2 items-center gap-4">
           <Title children="Home" className="!my-0 hidden sm:block" />
+          <DailyStats user={user} />
         </Row>
 
         {isLoading && <LoadingIndicator />}

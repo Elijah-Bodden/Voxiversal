@@ -1,5 +1,3 @@
-import { bugEmail } from 'web/../common/config/defs'
-
 import React from 'react'
 import {
   ChatAlt2Icon,
@@ -9,9 +7,10 @@ import {
 } from '@heroicons/react/outline'
 import { LinkIcon, PresentationChartBarIcon } from '@heroicons/react/solid'
 import clsx from 'clsx'
+import { useRouter } from 'next/router'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
-import { useState } from 'react'
 import { Post } from 'common/post'
 import { getUserByUsername, User } from 'web/lib/firebase/users'
 import Custom404 from 'web/pages/404'
@@ -50,7 +49,9 @@ import {
   PostBanBadge,
   UserBadge,
 } from 'web/components/widgets/user-link'
+import { FullscreenConfetti } from 'web/components/widgets/fullscreen-confetti'
 import { Subtitle } from 'web/components/widgets/subtitle'
+import { DailyStats } from 'web/components/daily-stats'
 import { useSaveReferral } from 'web/hooks/use-save-referral'
 import { UserLikedContractsButton } from 'web/components/profile/user-liked-contracts-button'
 import { getPostsByUser } from 'web/lib/supabase/post'
@@ -108,10 +109,16 @@ const DeletedUser = () => {
   return (
     <Page>
       <div className="flex h-full flex-col items-center justify-center">
-        <Title children="Deleted account page." />
+        <Title children="Deleted account page" />
         <p>This user has been deleted.</p>
-        <p>If you didn't expect this, shoot us an <a href={'mailto:' + bugEmail}>email</a>!</p>
+        <p>If you didn't expect this, let us know on Discord!</p>
         <br />
+        <iframe
+          src="https://discord.com/widget?id=915138780216823849&theme=dark"
+          width="350"
+          height="500"
+          sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+        ></iframe>
       </div>
     </Page>
   )
@@ -120,9 +127,29 @@ const DeletedUser = () => {
 export function UserProfile(props: { user: User; posts: Post[] }) {
   const user = useUserById(props.user.id) ?? props.user
 
+  const router = useRouter()
   const currentUser = useUser()
   const isCurrentUser = user.id === currentUser?.id
+  const [showConfetti, setShowConfetti] = useState(false)
   const userPosts = usePostsByUser(user.id) ?? props.posts
+
+  useEffect(() => {
+    const claimedMana = router.query['claimed-mana'] === 'yes'
+    setShowConfetti(claimedMana)
+    const query = { ...router.query }
+    if (query.claimedMana || query.show) {
+      const queriesToDelete = ['claimed-mana', 'show', 'badge']
+      queriesToDelete.forEach((key) => delete query[key])
+      router.replace(
+        {
+          pathname: router.pathname,
+          query,
+        },
+        undefined,
+        { shallow: true }
+      )
+    }
+  }, [])
 
   return (
     <Page key={user.id}>
@@ -131,6 +158,9 @@ export function UserProfile(props: { user: User; posts: Post[] }) {
         description={user.bio ?? ''}
         url={`/${user.username}`}
       />
+      {showConfetti && (
+        <FullscreenConfetti recycle={false} numberOfPieces={300} />
+      )}
 
       <Col className="mx-4 mt-1">
         <Row className="flex-wrap justify-between gap-2 p-1">
@@ -177,7 +207,7 @@ export function UserProfile(props: { user: User; posts: Post[] }) {
           </Row>
 
           {isCurrentUser ? (
-            <div/>
+            <DailyStats user={user} />
           ) : (
             <Row className="items-center gap-2">
               <MoreOptionsUserButton user={user} />
